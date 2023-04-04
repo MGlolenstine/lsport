@@ -1,0 +1,17 @@
+[package]
+name = "lsport"
+version = "0.1.0"
+edition = "2021"
+authors = [ "mglolenstine" ]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[lib]
+name = "lsport"
+path = "src/lib.rs"
+
+[[bin]]
+name = "lsport"
+path = "src/main.rs"
