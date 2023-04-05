@@ -12,7 +12,7 @@ pub struct SerialInfo {
     pub group: String,
     pub path: String,
     pub driver: String,
-    pub time: String,
+    pub timestamp: usize,
 }
 
 impl SerialInfo {
@@ -34,6 +34,14 @@ impl SerialInfo {
             .output()
             .expect("Failed to find bash or ls");
 
+        let timestamp = Command::new("bash")
+            .args(["-c", &format!("stat {} -c%Y", path)])
+            .output()
+            .expect("Failed to find bash or ls");
+        let timestamp = dbg!(String::from_utf8_lossy(&timestamp.stdout).replace('\n', ""))
+            .parse::<usize>()
+            .unwrap_or_default();
+
         let splot = String::from_utf8_lossy(&output.stdout);
         let splot = splot.split(' ').collect::<Vec<_>>();
 
@@ -43,7 +51,7 @@ impl SerialInfo {
             group: str_to_string(splot.get(3)),
             path,
             driver,
-            time: "WIP".to_string(),
+            timestamp,
         }
     }
 }
@@ -51,8 +59,8 @@ impl SerialInfo {
 impl Display for SerialInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
-            "{:15}{:10}{:10}{:20}{:20}",
-            self.permissions, self.owner, self.group, self.path, self.driver,
+            "{:15}{:10}{:10}{:10} {:20}{:20}",
+            self.permissions, self.owner, self.group, self.timestamp, self.path, self.driver,
         ))
     }
 }
@@ -60,8 +68,8 @@ impl Display for SerialInfo {
 /// Get a header for SerialInfo's Display implementation
 pub fn get_header() -> String {
     format!(
-        "{:15}{:10}{:10}{:20}{:20}",
-        "Permissions", "Owner", "Group", "Path", "Driver"
+        "{:15}{:10}{:10}{:10} {:20}{:20}",
+        "Permissions", "Owner", "Group", "Timestamp", "Path", "Driver"
     )
 }
 
