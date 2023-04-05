@@ -29,6 +29,14 @@ impl SerialInfo {
             .map(|s| s.to_string())
             .unwrap_or_default();
 
+        let output = Command::new("bash")
+            .args(["-c", &format!("ls -l {}", path)])
+            .output()
+            .expect("Failed to find bash or ls");
+
+        let splot = String::from_utf8_lossy(&output.stdout);
+        let splot = splot.split(' ').collect::<Vec<_>>();
+
         Self {
             permissions: str_to_string(splot.first())[1..].to_string(),
             owner: str_to_string(splot.get(2)),
