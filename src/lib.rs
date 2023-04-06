@@ -38,7 +38,8 @@ impl SerialInfo {
             .args(["-c", &format!("stat {} -c%Y", path)])
             .output()
             .expect("Failed to find bash or ls");
-        let timestamp = dbg!(String::from_utf8_lossy(&timestamp.stdout).replace('\n', ""))
+        let timestamp = String::from_utf8_lossy(&timestamp.stdout)
+            .replace('\n', "")
             .parse::<usize>()
             .unwrap_or_default();
 
