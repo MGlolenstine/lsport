@@ -3,6 +3,7 @@
 // Response:
 // lrwxrwxrwx 1 root root 0 Apr  4 16:21 /sys/class/tty/ttyS3/device/driver -> ../../../bus/platform/drivers/serial8250
 
+use regex::Regex;
 use std::{fmt::Display, process::Command};
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -17,17 +18,13 @@ pub struct SerialInfo {
 
 impl SerialInfo {
     fn from_str(data: &str) -> Self {
-        let splot = data.split(' ').collect::<Vec<_>>();
+        // let splot = data.split(' ').collect::<Vec<_>>();
 
-        let path = str_to_string(splot.get(9))
-            .replace("/sys/class/tty", "/dev")
-            .replace("/device/driver", "");
+        let re = Regex::new(r"sys\/class\/tty\/([^\/]+).*?drivers\/(.+$)").unwrap();
+        let cap = re.captures(&data).unwrap();
 
-        let driver = str_to_string(splot.get(11))
-            .split('/')
-            .last()
-            .map(|s| s.to_string())
-            .unwrap_or_default();
+        let path = format!("/dev/{}", &cap[1]);
+        let driver = (&cap[2]).to_string();
 
         let output = Command::new("bash")
             .args(["-c", &format!("ls -l {}", path)])
